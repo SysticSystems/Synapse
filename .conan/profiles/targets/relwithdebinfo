@@ -1,0 +1,20 @@
+[settings]
+build_type=Debug
+
+[options]
+# Enable testing targets across dependency graph if supported by conanfile
+*:enable_testing=True
+
+[buildenv]
+# Enable debug assertions and detailed test reporting
+ASAN_OPTIONS=symbolize=1:abort_on_error=1
+ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer
+
+[conf]
+# Pass no optimization (-O0), frame pointers, maximum debug info (-g3), and sanitizer-friendly flags to CMake
+tools.build:cxxflags=["-O0", "-g3", "-fno-omit-frame-pointer"]
+tools.build:cflags=["-O0", "-g3", "-fno-omit-frame-pointer"]
+
+# Linker flags to maintain detailed frame pointers during stack unwinding
+tools.build:sharedlinkflags=["-rdynamic"]
+tools.build:exelinkflags=["-rdynamic"]
