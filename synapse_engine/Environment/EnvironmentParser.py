@@ -116,8 +116,10 @@ class EnvironmentParser:
         out_dir_raw = resolve_value("OUT_DIR")
         if out_dir_raw:
             out_dir = Path(out_dir_raw)
+            if not out_dir.is_absolute():
+                out_dir = Path.cwd() / out_dir
         else:
-            out_dir = Path(f".build-{target_stem}")
+            out_dir = Path.cwd() / f".build-{target_stem}"
 
         # 9. Conan Remote Configuration
         conan_remote_name = resolve_value("CONAN_REMOTE_NAME") or ""
