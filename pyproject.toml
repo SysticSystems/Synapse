@@ -1,0 +1,36 @@
+[project]
+name = "synapse"
+version = "0.1.0"
+description = "Build orchestrator for C++ projects: runs Conan, CMake, compile, test, tidy, and publish phases in a container."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Systic Dev Team" }
+]
+keywords = ["build", "cmake", "conan", "clang-tidy", "oci", "cpp"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+synapse = "synapse:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["synapse"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["synapse_engine*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

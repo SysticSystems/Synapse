@@ -1,0 +1,11 @@
+[settings]
+build_type=Release
+
+[options]
+# Disable testing targets across dependency graph for release builds
+*:enable_testing=False
+
+[conf]
+# Maximum performance optimizations, vectorization, link-time optimization, and standard frame pointer retention
+tools.build:cxxflags=["-O3", "-DNDEBUG", "-march=native", "-flto", "-fno-omit-frame-pointer"]
+tools.build:cflags=["-O3", "-DNDEBUG", "-march=native", "-flto"]
