@@ -112,14 +112,20 @@ class EnvironmentParser:
         else:
             conan_enabled = conan_enabled_raw.strip().lower() in ("true", "1", "on", "yes")
 
+        # Force container project root (/project) if present to prevent CMakeCache path mismatches between /workspace and /project
+        project_root = Path("/project") if Path("/project").is_dir() else Path.cwd()
+
         # 8. Output Directory resolution (.build-test, .build-release, etc.)
         out_dir_raw = resolve_value("OUT_DIR")
         if out_dir_raw:
             out_dir = Path(out_dir_raw)
-            if not out_dir.is_absolute():
-                out_dir = Path.cwd() / out_dir
+            if not out_dir.is_absolute() and Path("/project").is_dir():
+                out_dir = Path("/project") / out_dir
         else:
-            out_dir = Path.cwd() / f".build-{target_stem}"
+            if Path("/project").is_dir():
+                out_dir = Path("/project") / f".build-{target_stem}"
+            else:
+                out_dir = Path(f".build-{target_stem}")
 
         # 9. Conan Remote Configuration
         conan_remote_name = resolve_value("CONAN_REMOTE_NAME") or ""

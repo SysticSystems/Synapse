@@ -1,7 +1,9 @@
 FROM python:3.12-slim AS base
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    CC=clang \
+    CXX=clang++
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential clang clang-tidy clang-format cmake ninja-build git ca-certificates \
@@ -14,7 +16,6 @@ WORKDIR /workspace
 COPY pyproject.toml ./
 COPY synapse_engine ./synapse_engine
 COPY synapse.py ./synapse.py
-COPY .conan ./.conan
 RUN pip install --no-cache-dir .
 
 # --- The C++ project being built gets mounted here instead ---

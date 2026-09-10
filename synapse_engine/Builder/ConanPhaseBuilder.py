@@ -16,18 +16,18 @@ class ConanPhaseBuilder:
         self.synapse_root = Path("/workspace")
 
     def _resolve_profile(self, profile_name: str) -> Path:
-        """Resolves a profile path against synapse root, CWD, and global Conan cache."""
+        """Resolves a profile path, prioritizing the target project CWD over the engine root."""
         candidates = [
-            self.synapse_root / ".conan" / "profiles" / profile_name,
-            Path.cwd() / ".conan" / "profiles" / profile_name,
-            Path.home() / ".conan2" / "profiles" / profile_name,
-            ]
+            Path.cwd() / ".conan" / "profiles" / profile_name,          # 1. Target project (Mounted /project)
+            self.synapse_root / ".conan" / "profiles" / profile_name,     # 2. Synapse engine fallback (/workspace)
+            Path.home() / ".conan2" / "profiles" / profile_name,          # 3. Global Conan cache
+        ]
         for candidate in candidates:
             if candidate.is_file():
                 return candidate.resolve()
 
-        # Fallback to absolute path under synapse root
-        return self.synapse_root / ".conan" / "profiles" / profile_name
+        # Fallback default pointing to the project directory
+        return Path.cwd() / ".conan" / "profiles" / profile_name
 
     def _get_active_profiles(self) -> tuple[Path, Path]:
         """Resolves the base toolchain profile and the target build profile."""
