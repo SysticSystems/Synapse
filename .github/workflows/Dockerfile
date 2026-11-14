@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     CXX=clang++
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential clang clang-tidy clang-format cmake ninja-build git ca-certificates \
+    build-essential clang clang-tidy clang-format cmake ninja-build git ca-certificates doxygen \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir conan==2.*

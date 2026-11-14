@@ -964,7 +964,19 @@ class TestSynapseOrchestrator(unittest.TestCase):
         self.orchestrator.run(run_test=False, run_fix=False, run_publish=False)
         self.assertEqual(mock_run_phase.call_count, 3)
         phase_names = [call_args[0][0] for call_args in mock_run_phase.call_args_list]
-        self.assertEqual(phase_names, ["Conan Resolution", "CMake Configuration", "Compilation"])
+        self.assertEqual(
+            phase_names,
+            ["Conan Resolution", "CMake Configuration", "Compilation"],
+        )
+
+    @patch("synapse_engine.Runner.LocalRunner.LocalRunner.run_phase")
+    def test_doc_flag_triggers_doxygen_phase(self, mock_run_phase):
+        self.orchestrator.run(run_doc=True)
+        phase_names = [call_args[0][0] for call_args in mock_run_phase.call_args_list]
+        self.assertEqual(
+            phase_names,
+            ["Doxygen Generation", "Conan Resolution", "CMake Configuration", "Compilation"],
+        )
 
     @patch("synapse_engine.Runner.LocalRunner.LocalRunner.run_phase")
     def test_fix_runs_tidy_and_returns_early(self, mock_run_phase):
@@ -980,7 +992,12 @@ class TestSynapseOrchestrator(unittest.TestCase):
         phase_names = [call_args[0][0] for call_args in mock_run_phase.call_args_list]
         self.assertEqual(
             phase_names,
-            ["Conan Resolution", "CMake Configuration", "Compilation", "Testing & Benchmarking"],
+            [
+                "Conan Resolution",
+                "CMake Configuration",
+                "Compilation",
+                "Testing & Benchmarking",
+            ],
         )
 
     @patch("synapse_engine.Runner.LocalRunner.LocalRunner.run_phase")
@@ -997,6 +1014,7 @@ class TestSynapseOrchestrator(unittest.TestCase):
         orchestrator.run(run_test=False)
         self.assertEqual(mock_run_phase.call_count, 4)
         phase_names = [call_args[0][0] for call_args in mock_run_phase.call_args_list]
+        self.assertEqual(phase_names[0], "Conan Resolution")
         self.assertIn("Testing & Benchmarking", phase_names)
 
     @patch("synapse_engine.Runner.LocalRunner.LocalRunner.run_phase")
@@ -1006,7 +1024,12 @@ class TestSynapseOrchestrator(unittest.TestCase):
         phase_names = [call_args[0][0] for call_args in mock_run_phase.call_args_list]
         self.assertEqual(
             phase_names,
-            ["Conan Resolution", "CMake Configuration", "Compilation", "Package & Publish"],
+            [
+                "Conan Resolution",
+                "CMake Configuration",
+                "Compilation",
+                "Package & Publish",
+            ],
         )
 
 
@@ -1041,6 +1064,7 @@ class TestCLI(unittest.TestCase):
             run_test=True,
             run_fix=False,
             run_publish=False,
+            run_doc=False,
         )
 
     @patch.object(SynapseOrchestrator, "run")
@@ -1060,6 +1084,7 @@ class TestCLI(unittest.TestCase):
             run_test=False,
             run_fix=False,
             run_publish=False,
+            run_doc=False,
         )
 
     @patch.object(SynapseOrchestrator, "run")
@@ -1075,6 +1100,7 @@ class TestCLI(unittest.TestCase):
             run_test=False,
             run_fix=True,
             run_publish=False,
+            run_doc=False,
         )
 
     @patch.object(SynapseOrchestrator, "run")
@@ -1090,6 +1116,23 @@ class TestCLI(unittest.TestCase):
             run_test=False,
             run_fix=False,
             run_publish=True,
+            run_doc=False,
+        )
+
+    @patch.object(SynapseOrchestrator, "run")
+    @patch.object(EnvironmentParser, "load_config")
+    def test_main_cli_dispatch_doc(self, mock_load_config, mock_orch_run):
+        mock_config = MagicMock()
+        mock_load_config.return_value = mock_config
+
+        with patch.object(sys, "argv", ["synapse", "--doc"]):
+            synapse.main()
+
+        mock_orch_run.assert_called_once_with(
+            run_test=False,
+            run_fix=False,
+            run_publish=False,
+            run_doc=True,
         )
 
 

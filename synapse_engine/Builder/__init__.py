@@ -4,6 +4,7 @@ from .ConanPhaseBuilder import ConanPhaseBuilder
 from .PublishPhaseBuilder import PublishPhaseBuilder
 from .TestPhaseBuilder import TestPhaseBuilder
 from .TidyPhaseBuilder import TidyPhaseBuilder
+from .DoxygenPhaseBuilder import DoxygenPhaseBuilder
 
 __all__ = [
     "CMakePhaseBuilder",
@@ -12,4 +13,5 @@ __all__ = [
     "PublishPhaseBuilder",
     "TestPhaseBuilder",
     "TidyPhaseBuilder",
+    "DoxygenPhaseBuilder"
 ]

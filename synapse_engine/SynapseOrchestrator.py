@@ -4,6 +4,7 @@ from typing import Optional
 from .Builder.CMakePhaseBuilder import CMakePhaseBuilder
 from .Builder.CompilePhaseBuilder import CompilePhaseBuilder
 from .Builder.ConanPhaseBuilder import ConanPhaseBuilder
+from .Builder.DoxygenPhaseBuilder import DoxygenPhaseBuilder
 from .Builder.PublishPhaseBuilder import PublishPhaseBuilder
 from .Builder.TestPhaseBuilder import TestPhaseBuilder
 from .Builder.TidyPhaseBuilder import TidyPhaseBuilder
@@ -24,6 +25,7 @@ class SynapseOrchestrator:
             run_test: bool = False,
             run_fix: bool = False,
             run_publish: bool = False,
+            run_doc: bool = False,
     ) -> None:
         """Executes the pipeline builders based on configuration and phase flags."""
 
@@ -33,27 +35,30 @@ class SynapseOrchestrator:
             self.local_runner.run_phase("Clang-Tidy Fix", tidy_builder)
             return
 
-        # 2. Conan Dependency Resolution
+        # 2. Doxygen Documentation & Contract Verification Phase (Optional)
+        if run_doc:
+            doxygen_builder = DoxygenPhaseBuilder(self.config, workspace_dir=self.workspace_dir)
+            self.local_runner.run_phase("Doxygen Generation", doxygen_builder)
+
+        # 3. Conan Dependency Resolution
         conan_builder = ConanPhaseBuilder(self.config)
         self.local_runner.run_phase("Conan Resolution", conan_builder)
 
-        # 3. CMake Configuration
+        # 4. CMake Configuration
         cmake_builder = CMakePhaseBuilder(self.config)
         self.local_runner.run_phase("CMake Configuration", cmake_builder)
 
-        # 4. Native Multi-Core Compilation
+        # 5. Native Multi-Core Compilation
         compile_builder = CompilePhaseBuilder(self.config)
         self.local_runner.run_phase("Compilation", compile_builder)
 
-        # 5. Testing & Benchmarking Phase
-        # Triggers if --test flag is set OR if build_type is 'Testing' / 'Debug'
-
+        # 6. Testing & Benchmarking Phase
         should_test = run_test or self.config.build_type == "RelWithDebInfo"
         if should_test:
             test_builder = TestPhaseBuilder(self.config, workspace_dir=self.workspace_dir)
             self.local_runner.run_phase("Testing & Benchmarking", test_builder)
 
-        # 6. Package & Artifact Publishing
+        # 7. Package & Artifact Publishing
         if run_publish:
             publish_builder = PublishPhaseBuilder(self.config, workspace_dir=self.workspace_dir)
             self.local_runner.run_phase("Package & Publish", publish_builder)

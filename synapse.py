@@ -41,6 +41,11 @@ def main() -> None:
         help="Package artifact with Conan create and publish upstream to remote registry",
     )
     parser.add_argument(
+        "--doc",
+        action="store_true",
+        help="Run Doxygen documentation contract verification and enforce strict coverage checks",
+    )
+    parser.add_argument(
         "--env-file",
         type=Path,
         default=Path(".env"),
@@ -61,7 +66,8 @@ def main() -> None:
     orchestrator.run(
         run_test=args.test,
         run_fix=args.fix,
-        run_publish=args.publish
+        run_publish=args.publish,
+        run_doc=args.doc,
     )
 
 
